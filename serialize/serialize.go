@@ -3,10 +3,9 @@ package serialize
 import (
 	"bytes"
 	"fmt"
+	"github.com/onuragtas/gophp/utils"
 	"reflect"
 	"sort"
-
-	"github.com/leeqvip/gophp/utils"
 )
 
 func Marshal(value interface{}) ([]byte, error) {
@@ -29,6 +28,8 @@ func Marshal(value interface{}) ([]byte, error) {
 		return MarshalMap(value)
 	case reflect.Slice:
 		return MarshalSlice(value)
+	case reflect.Struct:
+		return MarshalStruct(value)
 	default:
 		return nil, fmt.Errorf("Marshal: Unknown type %T with value %#v", t, value)
 	}
@@ -125,4 +126,30 @@ func MarshalSlice(value interface{}) ([]byte, error) {
 	}
 
 	return []byte(fmt.Sprintf("a:%d:{%s}", s.Len(), buffer.String())), nil
+}
+
+func MarshalStruct(data interface{}) ([]byte, error) {
+	var buffer bytes.Buffer
+	val := reflect.ValueOf(data)
+	t := reflect.TypeOf(data)
+
+	if val.Kind() == reflect.Struct {
+		numFields := val.NumField()
+		buffer.Write([]byte(fmt.Sprintf("a:%d:{", numFields)))
+		for i := 0; i < numFields; i++ {
+			fieldValue := val.Field(i).Interface()
+
+			buffer.Write([]byte(fmt.Sprintf("s:%d:\"%s\";", len(t.Field(i).Tag.Get("php")), t.Field(i).Tag.Get("php"))))
+			marshal, err := Marshal(fieldValue)
+			if err != nil {
+				return nil, err
+			}
+			buffer.Write(marshal)
+
+		}
+
+		buffer.Write([]byte("}"))
+	}
+
+	return []byte(fmt.Sprintf("%s", buffer.String())), nil
 }
