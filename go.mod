@@ -1,3 +1,3 @@
-module github.com/leeqvip/gophp
+module github.com/onuragtas/gophp
 
-go 1.11
+go 1.20
