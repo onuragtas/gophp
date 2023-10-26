@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/onuragtas/gophp/utils"
+	"log"
 	"reflect"
 	"sort"
 )
@@ -137,16 +138,15 @@ func MarshalStruct(data interface{}) ([]byte, error) {
 		numFields := val.NumField()
 		buffer.Write([]byte(fmt.Sprintf("a:%d:{", numFields)))
 		for i := 0; i < numFields; i++ {
-			if !val.Field(i).IsNil() {
-				fieldValue := val.Field(i).Interface()
+			log.Println(i)
+			fieldValue := val.Field(i).Interface()
 
-				buffer.Write([]byte(fmt.Sprintf("s:%d:\"%s\";", len(t.Field(i).Tag.Get("php")), t.Field(i).Tag.Get("php"))))
-				marshal, err := Marshal(fieldValue)
-				if err != nil {
-					return nil, err
-				}
-				buffer.Write(marshal)
+			buffer.Write([]byte(fmt.Sprintf("s:%d:\"%s\";", len(t.Field(i).Tag.Get("php")), t.Field(i).Tag.Get("php"))))
+			marshal, err := Marshal(fieldValue)
+			if err != nil {
+				return nil, err
 			}
+			buffer.Write(marshal)
 		}
 
 		buffer.Write([]byte("}"))
