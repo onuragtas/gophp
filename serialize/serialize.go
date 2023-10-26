@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/onuragtas/gophp/utils"
+	"log"
 	"reflect"
 	"sort"
 	"time"
@@ -29,7 +30,12 @@ func Marshal(value interface{}) ([]byte, error) {
 		return MarshalMap(value)
 	case reflect.Slice:
 		return MarshalSlice(value)
+	case reflect.Ptr:
+		if reflect.TypeOf(value).String() == "*gophp.N" {
+			return MarshalNil(), nil
+		}
 	case reflect.Struct:
+		log.Println(reflect.TypeOf(value).String())
 		if reflect.TypeOf(value).Kind() == reflect.Struct && reflect.TypeOf(value).String() == "time.Time" {
 			return MarshalTime(value.(time.Time))
 		} else {
