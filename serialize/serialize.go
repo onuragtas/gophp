@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/onuragtas/gophp/utils"
-	"log"
 	"reflect"
 	"sort"
+	"time"
 )
 
 func Marshal(value interface{}) ([]byte, error) {
@@ -30,12 +30,20 @@ func Marshal(value interface{}) ([]byte, error) {
 	case reflect.Slice:
 		return MarshalSlice(value)
 	case reflect.Struct:
-		return MarshalStruct(value)
+		if reflect.TypeOf(value).Kind() == reflect.Struct && reflect.TypeOf(value).String() == "time.Time" {
+			return MarshalTime(value.(time.Time))
+		} else {
+			return MarshalStruct(value)
+		}
 	default:
 		return nil, fmt.Errorf("Marshal: Unknown type %T with value %#v", t, value)
 	}
 
 	return nil, nil
+}
+
+func MarshalTime(t time.Time) ([]byte, error) {
+	return []byte(fmt.Sprintf("s:%d:\"%s\";", len(t.Format(time.RFC3339)), t.Format(time.RFC3339))), nil
 }
 
 func MarshalNil() []byte {
@@ -138,7 +146,6 @@ func MarshalStruct(data interface{}) ([]byte, error) {
 		numFields := val.NumField()
 		buffer.Write([]byte(fmt.Sprintf("a:%d:{", numFields)))
 		for i := 0; i < numFields; i++ {
-			log.Println(i)
 			fieldValue := val.Field(i).Interface()
 
 			buffer.Write([]byte(fmt.Sprintf("s:%d:\"%s\";", len(t.Field(i).Tag.Get("php")), t.Field(i).Tag.Get("php"))))
