@@ -31,7 +31,7 @@ func Marshal(value interface{}) ([]byte, error) {
 	case reflect.Slice:
 		return MarshalSlice(value)
 	case reflect.Ptr:
-		if reflect.TypeOf(value).String() == "*gophp.N" {
+		if reflect.TypeOf(value).String() == "*gophp.N" || reflect.ValueOf(value).IsNil() {
 			return MarshalNil(), nil
 		}
 	case reflect.Struct:
