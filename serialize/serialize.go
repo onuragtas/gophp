@@ -42,7 +42,7 @@ func Marshal(value interface{}) ([]byte, error) {
 			return MarshalStruct(value)
 		}
 	default:
-		return nil, fmt.Errorf("Marshal: Unknown type %T with value %#v", t, value)
+		return MarshalNil(), nil
 	}
 
 	return nil, nil
